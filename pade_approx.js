@@ -1,5 +1,4 @@
-const math = require('mathjs');
-require('chartjs');
+//const math = require('mathjs');
 //import Chart from 'chart.js/auto';
 // let func = 'sin(x)'
 
@@ -40,36 +39,47 @@ function getPadeParams(){
   const func = document.getElementById('func').value;
   const x = document.getElementById('x').value;
   const numDeg = document.getElementById('numDeg').value;
-  const denumDeg = document.getElementById('denumDeg').value;
-  return {func, x, numDeg, denumDeg}
+  const denomDeg = document.getElementById('denomDeg').value;
+  return {func, x, numDeg, denomDeg}
 }
 
 // Функция для вычисления коэффициентов Паде
 function padeApproximation() {
-  let params = getPadeParams
-  func = params[0]
-  x = params[1]
-  numDeg = params[2]
-  denumDeg = params[3]
+  let params = getPadeParams;
+  const func = params[0];
+  const x = params[1];
+  const numDeg = params[2];
+  const denomDeg = params[3];
 
-  let result = padeApproximation('sin(x)', numDeg, denumDeg);
-  // console.log("Числитель коэффициентов Паде:", result.numerator);
-  // console.log("Знаменатель коэффициентов Паде:", result.denominator);
-  coefs = taylorSeries(func, x, n + m)
+  coefs = taylorSeries(func, x, n + m);
 }
+
+function calcTaylor(coefs, x, x_0){
+  var result = 0;
+    
+  for (var i = 0; i < coefs.length; i++) {
+    result += coefs[i] * Math.pow((x-x_0), i);
+  }
+
+  return result;
+}
+
+
 
 function plotPadeApproximation(){
   const chartContext = document.getElementsByClassName('canvas')[0].getContext('2d');
-  //const x = document.getElementById('x').value;
-  const x = 5;
-  const start = x - 5;
-  const stop = x + 5;
+  const x = document.getElementById('x').value;
+  offset = 5;
+  const start = x - offset;
+  const stop = x + offset;
   const step = 0.1;
-  const length = (stop - start) / step + 1;
+  const length = 2 * offset / step + 1;
   const domain = Array.from(Array(length), (_, index) => start + index * step);
   // const fxnToArray = fxn => Array.from(domain, fxn);
   // const range = fxnToArray(Math.sin);
   const range = domain.map(x => Math.sin(x));
+  coefs = taylorSeries('sin(x)', x, 5)
+  const rangeT = domain.map(y => calcTaylor(coefs, y, x));
   new Chart(chartContext, {
     type: 'line',
     data: {
@@ -78,22 +88,29 @@ function plotPadeApproximation(){
         {
           label: "f(x)",
           data: range,
+          lineTension: 0.4,
           backgroundColor: ["rgba(105, 0, 132, .2)"],
           borderColor: ["rgba(200, 99, 132, .7)"],
           borderWidth: 2
-        }//,
-        // {
-        //   label: `Taylor Series (n = ${degree - 1})`,
-        //   data: rangeOfApproximation,
-        //   backgroundColor: ["rgba(0, 137, 132, .2)"],
-        //   borderColor: ["rgba(0, 10, 130, .7)"],
-        //   borderWidth: 2
-        // }
+        },
+        {
+          label: `Taylor Series (n = 5)`,
+          data: rangeT,
+          backgroundColor: ["rgba(0, 137, 132, .2)"],
+          borderColor: ["rgba(0, 10, 130, .7)"],
+          borderWidth: 2
+        }
       ]
-    }//,
-    // options: {
-    //   responsive: true
-    // }
+    },
+    options: {
+      scale: {
+        ticks: {
+          min : -7,
+          max : 7,
+          precision: 0
+        }
+      }
+    }
   });
 }
 
