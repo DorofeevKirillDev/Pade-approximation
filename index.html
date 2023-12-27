@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pade approximation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+
+        h1, h2 {
+            color: #004080;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #004080;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px 0 15px 0;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 10px 5px 0 0;
+            background-color: #004080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #002f5e;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #004080;
+            color: #fff;
+        }
+
+        #error {
+            display: block;
+            color: red;
+        }
+    </style>
+    <script src="pade_approx.js"></script>
+</head>
+
+<body>
+    <h1>Pade approximation</h1>
+
+    <label for="function">Function:</label>
+    <input type="text" id="function" value="sin(x)" />
+    <br>
+    <label for="x">x:</label>
+    <input type="number" id="x" value="1.571" />
+    <br>
+    <label for="numDeg">Function:</label>
+    <input type="number" id="numDeg" value="3" />
+    <br>
+    <label for="denumDeg">x:</label>
+    <input type="number" id="denumDeg" value="4" />
+    <span id="error"></span>
+    <br>
+    <script src="chart.umd.js"></script>
+
+    <canvas class="canvas"></canvas>
+    
+    <button onclick="plotPadeApproximation()">Нажми меня</button>
+    
+    
+</body>
+
+</html>
