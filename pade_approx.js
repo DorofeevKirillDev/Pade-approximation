@@ -23,6 +23,7 @@ function derivativeAtPoint(derivative, x) {
 }
 
 function taylorSeries(func, x, n) {
+  console.log("n = ", n);
   let coefs = []
   const func_p = math.parse(func);
   const func_c = func_p.compile();
@@ -36,22 +37,47 @@ function taylorSeries(func, x, n) {
 }
 
 function getPadeParams(){
-  const func = document.getElementById('func').value;
-  const x = document.getElementById('x').value;
+  const func = document.getElementById('function').value;
+  const func1 = 'sin(x)'
+  const x = parseFloat(document.getElementById('x').value);
   const numDeg = document.getElementById('numDeg').value;
   const denomDeg = document.getElementById('denomDeg').value;
-  return {func, x, numDeg, denomDeg}
+  return [func1, x, numDeg, denomDeg]
 }
 
 // Функция для вычисления коэффициентов Паде
 function padeApproximation() {
-  let params = getPadeParams;
+  let params = getPadeParams();
   const func = params[0];
   const x = params[1];
-  const numDeg = params[2];
-  const denomDeg = params[3];
+  const numDeg = +params[2];
+  const denomDeg = +params[3];
 
-  coefs = taylorSeries(func, x, n + m);
+  coefs = taylorSeries(func, x, numDeg + denomDeg);
+  var rhs = [];
+  var matrix = [];
+  mat_size = denomDeg
+  for (var i = 0; i < mat_size; i++) {
+    rhs[i] = -coefs[i + numDeg + 1];
+    matrix[i] = [];
+    let c_ind = numDeg + i;
+    for (var j = 0; j < mat_size; j++) {
+      if (c_ind >= 0) {
+        matrix[i][j] = coefs[c_ind];
+      } else {
+        matrix[i][j] = 0;
+      }
+      c_ind -= 1;
+    }
+  }
+  for (var i = 0; i < numDeg + 1; i++) {
+    
+  }
+  let invMat = math.inv(matrix);
+  const numCoefs1 = [1];
+  const numCoefs2 = math.multiply(invMat, rhs);
+  const numCoefs = numCoefs1.concat(numCoefs2);
+  console.log(numCoefs)
 }
 
 function calcTaylor(coefs, x, x_0){
@@ -69,6 +95,7 @@ function calcTaylor(coefs, x, x_0){
 function plotPadeApproximation(){
   const chartContext = document.getElementsByClassName('canvas')[0].getContext('2d');
   const x = document.getElementById('x').value;
+  console.log(x);
   offset = 5;
   const start = x - offset;
   const stop = x + offset;
@@ -140,7 +167,6 @@ function plotPadeApproximation(){
 //       data: data
 //   });
 // }
-
 
 
 
