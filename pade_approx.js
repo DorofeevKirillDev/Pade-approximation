@@ -23,7 +23,6 @@ function derivativeAtPoint(derivative, x) {
 }
 
 function taylorSeries(func, x, n) {
-  console.log("n = ", n);
   let coefs = []
   const func_p = math.parse(func);
   const func_c = func_p.compile();
@@ -38,11 +37,10 @@ function taylorSeries(func, x, n) {
 
 function getPadeParams(){
   const func = document.getElementById('function').value;
-  const func1 = 'sin(x)'
   const x = parseFloat(document.getElementById('x').value);
   const numDeg = document.getElementById('numDeg').value;
   const denomDeg = document.getElementById('denomDeg').value;
-  return [func1, x, numDeg, denomDeg]
+  return [func, x, numDeg, denomDeg]
 }
 
 // Функция для вычисления коэффициентов Паде
@@ -70,14 +68,23 @@ function padeApproximation() {
       c_ind -= 1;
     }
   }
-  for (var i = 0; i < numDeg + 1; i++) {
-    
-  }
   let invMat = math.inv(matrix);
-  const numCoefs1 = [1];
-  const numCoefs2 = math.multiply(invMat, rhs);
-  const numCoefs = numCoefs1.concat(numCoefs2);
-  console.log(numCoefs)
+  const denomCoefs1 = [1];
+  const denomCoefs2 = math.multiply(invMat, rhs);
+  const denomCoefs = denomCoefs1.concat(denomCoefs2);
+  let numCoefs = [coefs[0]]
+  for (var i = 1; i <= numDeg; i++) {
+    let c_ind = i;
+    let b_ind = 0;
+    numCoefs[i] = [0]
+    while (c_ind >= 0 && b_ind <= denomDeg) {
+      numCoefs[i] = parseFloat(numCoefs[i]);
+      numCoefs[i] += parseFloat(coefs[c_ind]) * parseFloat(denomCoefs[b_ind]);
+      c_ind -= 1;
+      b_ind += 1;
+    }
+  }
+  return[numCoefs, denomCoefs]
 }
 
 function calcTaylor(coefs, x, x_0){
@@ -90,23 +97,40 @@ function calcTaylor(coefs, x, x_0){
   return result;
 }
 
+function calcPade(numCoefs, denomCoefs, x, x_0){
+  var result1 = 0;
+  var result2 = 0;
+  for (var i = 0; i < numCoefs.length; i++) {
+    result1 += numCoefs[i] * Math.pow((x - x_0), i);
+  }
+  for (var i = 0; i < denomCoefs.length; i++) {
+    result2 += denomCoefs[i] * Math.pow((x - x_0), i);
+  }
+  res = result1 / result2;
+  console.log(res);
+  return res;
+}
 
 
 function plotPadeApproximation(){
-  const chartContext = document.getElementsByClassName('canvas')[0].getContext('2d');
+  const canvas = document.getElementsByClassName('canvas')[0];
+  const chartContext = canvas.getContext('2d');
   const x = document.getElementById('x').value;
-  console.log(x);
   offset = 5;
   const start = x - offset;
   const stop = x + offset;
-  const step = 0.1;
+  const step = 0.5;
   const length = 2 * offset / step + 1;
   const domain = Array.from(Array(length), (_, index) => start + index * step);
-  // const fxnToArray = fxn => Array.from(domain, fxn);
-  // const range = fxnToArray(Math.sin);
-  const range = domain.map(x => Math.sin(x));
-  coefs = taylorSeries('sin(x)', x, 5)
-  const rangeT = domain.map(y => calcTaylor(coefs, y, x));
+
+  const func = document.getElementById('function').value;
+  const func_p = math.parse(func);
+  const func_c = func_p.compile();
+  const range = domain.map(x => func_c.evaluate({ x: x }));
+  coefsT = taylorSeries(func, x, 5);
+  coefsP = padeApproximation();
+  const rangeT = domain.map(y => calcTaylor(coefsT, y, x));
+  const rangeP = domain.map(y => calcPade(coefsP[0], coefsP[1], y, x));
   new Chart(chartContext, {
     type: 'line',
     data: {
@@ -121,23 +145,36 @@ function plotPadeApproximation(){
           borderWidth: 2
         },
         {
-          label: `Taylor Series (n = 5)`,
+          label: `Taylor Series`,
           data: rangeT,
           backgroundColor: ["rgba(0, 137, 132, .2)"],
           borderColor: ["rgba(0, 10, 130, .7)"],
+          borderWidth: 2
+        }, 
+        {
+          label: "Pade",
+          data: rangeP,
+          lineTension: 0.4,
+          backgroundColor: ["rgba(105, 0, 132, .2)"],
+          borderColor: ["rgba(0, 99, 132, .7)"],
           borderWidth: 2
         }
       ]
     },
     options: {
-      scale: {
-        ticks: {
-          min : -7,
-          max : 7,
-          precision: 0
-        }
+      scales: {
+          xAxes: [{
+            type: 'linear',
+            ticks: {
+              callback: function(value, index, values) {
+                return parseFloat(value).toFixed(2);
+              },
+              autoSkip: false,
+              maxTicksLimit: 10,
+              stepSize: .2
+          }}]
       }
-    }
+  }
   });
 }
 
@@ -147,7 +184,7 @@ function plotPadeApproximation(){
 //   // Например, использование библиотеки Chart.js:
 //   const canvas = document.getElementsByClassName('canvas')[0];
 //   console.log(canvas);
-//   const ctx = canvas.getContext('2d');
+//   constchartContext = canvas.getContext('2d');
 //   const step = 0.1;
 //   const length = 100;
 //   const xValues = Array.from({ length }, (_, index) => index * step);
@@ -162,7 +199,7 @@ function plotPadeApproximation(){
 //           borderWidth: 1
 //       }]
 //   };
-//   var myChart = new Chart(ctx, {
+//   var myChart = new ChartchartContext, {
 //       type: 'line',
 //       data: data
 //   });
